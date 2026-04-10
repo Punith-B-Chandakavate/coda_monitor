@@ -70,7 +70,6 @@ class PatternDetector:
         if not text or not isinstance(text, str):
             return []
 
-        # Convert to string if it's not
         text = str(text)
 
         detections = []
@@ -80,7 +79,6 @@ class PatternDetector:
             for match in matches:
                 matched_value = match.group()
 
-                # Apply validation if exists
                 if pattern_info['validation']:
                     if not pattern_info['validation'](matched_value):
                         continue
@@ -91,7 +89,6 @@ class PatternDetector:
                     pattern_info['severity']
                 ))
 
-        # Remove duplicates
         return list(set(detections))
 
     def scan_table_rows(self, rows: List[Dict]) -> List[Dict]:
@@ -106,17 +103,12 @@ class PatternDetector:
                 column = cell.get('column', 'Unknown')
                 value = cell.get('value', '')
 
-                # Skip empty values
                 if not value:
                     continue
 
-                # Convert to string for pattern matching
                 value_str = str(value)
-
-                # Log for debugging
                 logger.debug(f"Scanning cell: {column} = {value_str[:100]}")
 
-                # Detect patterns
                 detections = self.detect_in_text(value_str)
 
                 if detections:

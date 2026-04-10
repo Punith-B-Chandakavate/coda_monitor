@@ -76,7 +76,7 @@ class CodaAPIClient:
         while True:
             params = {
                 'limit': min(limit, 100),
-                'useColumnNames': 'true'  # This returns values as dict with column names
+                'useColumnNames': 'true'
             }
             if page_token:
                 params['pageToken'] = page_token
@@ -86,33 +86,28 @@ class CodaAPIClient:
             if not data:
                 break
             
-            # Process rows - Coda API returns values in 'values' field
             for item in data.get('items', []):
                 row_data = {
                     'id': item.get('id'),
                     'cells': []
                 }
                 
-                # The data is in 'values' field when useColumnNames=true
                 if 'values' in item:
                     values = item['values']
                     
-                    # Convert the values dict to cells list
                     for column_name, column_value in values.items():
-                        if column_value:  # Only add non-empty values
+                        if column_value:
                             row_data['cells'].append({
                                 'column': column_name,
                                 'value': column_value
                             })
                 else:
-                    # Fallback to cells format (when useColumnNames=false)
                     for cell in item.get('cells', []):
                         cell_info = {
                             'column': cell.get('column'),
                             'value': cell.get('value')
                         }
                         
-                        # Handle different value types
                         if 'value' in cell:
                             cell_info['value'] = cell['value']
                         elif 'text' in cell:

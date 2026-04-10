@@ -35,7 +35,6 @@ class AlertService:
         if not self.slack_enabled:
             return
 
-        # Color coding based on severity
         color_emoji = {
             'CRITICAL': '🔴🔴🔴',
             'HIGH': '🟠🟠',
@@ -132,7 +131,6 @@ class AlertService:
             }
         ]
 
-        # Add issue details if available
         if issue_details:
             blocks.append({
                 "type": "section",
@@ -143,7 +141,6 @@ class AlertService:
                 ]
             })
 
-        # Add resolution note if present
         if remediation_data.get('note'):
             blocks.append({
                 "type": "section",
