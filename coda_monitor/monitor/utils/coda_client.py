@@ -24,7 +24,7 @@ class CodaAPIClient:
             logger.error(f"Coda API request failed: {e}")
             if hasattr(e, 'response') and e.response:
                 logger.error(f"Response: {e.response.text}")
-            return None
+            raise Exception(f"API Response Error: {e.response.text if hasattr(e, 'response') and e.response else str(e)}")
 
     def list_documents(self, limit: int = 100) -> List[Dict]:
         documents = []
