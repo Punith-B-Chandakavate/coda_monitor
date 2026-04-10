@@ -148,7 +148,7 @@ def remediate_issue_sync(issue_id: int, action: str, note: str = ""):
 
         # Send alert about remediation
         alert_service = AlertService()
-        result = alert_service.notify_remediation({
+        alert_service.notify_remediation({
             'action': action,
             'issue_id': issue_id,
             'new_status': issue.status,
