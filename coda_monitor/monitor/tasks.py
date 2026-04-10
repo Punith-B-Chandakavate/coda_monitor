@@ -136,7 +136,6 @@ def remediate_issue_sync(issue_id: int, action: str, note: str = ""):
         issue.resolution_note = note
         issue.save()
 
-        # Prepare issue details for Slack
         issue_details = {
             'document_name': issue.document.name,
             'pattern_type': issue.pattern_type,
@@ -146,7 +145,6 @@ def remediate_issue_sync(issue_id: int, action: str, note: str = ""):
             'detected_value': issue.detected_value[:100]
         }
 
-        # Send alert about remediation
         alert_service = AlertService()
         alert_service.notify_remediation({
             'action': action,

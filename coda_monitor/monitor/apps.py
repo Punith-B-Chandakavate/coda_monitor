@@ -9,10 +9,6 @@ class MonitorConfig(AppConfig):
     name = 'monitor'
 
     def ready(self):
-        # ✅ Always load signals
-        import monitor.signals
-
-        # ❌ Skip scheduler during migrate
         if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
             return
 

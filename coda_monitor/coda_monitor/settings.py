@@ -2,25 +2,20 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Security
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = False
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
-# Coda Configuration
 CODA_API_TOKEN = os.getenv('CODA_API_TOKEN', '')
 CODA_API_BASE_URL = 'https://coda.io/apis/v1'
 
-# Slack Configuration
 SLACK_WEBHOOK_URL = os.getenv('SLACK_WEBHOOK_URL', '')
 SLACK_ENABLED = bool(SLACK_WEBHOOK_URL and SLACK_WEBHOOK_URL.strip())
 
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -86,7 +81,6 @@ DATABASES = {
 #     }
 # }
 
-# Simple cache (no Redis needed)
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -102,7 +96,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
-# Logging - Simple file logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
