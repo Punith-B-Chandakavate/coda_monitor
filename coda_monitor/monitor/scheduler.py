@@ -10,14 +10,12 @@ scheduler = BackgroundScheduler()
 
 def start_scheduler():
     """Start the background scheduler for periodic scans"""
-    # Skip if running migrations
     if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
         return
 
     try:
         from .tasks import scan_all_documents
 
-        # Schedule the scan job every hour
         scheduler.add_job(
             scan_all_documents,
             trigger=IntervalTrigger(hours=1),
@@ -29,7 +27,6 @@ def start_scheduler():
         scheduler.start()
         logger.info("Scheduler started - scans will run every hour")
 
-        # Run initial scan after 10 seconds
         from django.utils import timezone
         scheduler.add_job(
             scan_all_documents,
