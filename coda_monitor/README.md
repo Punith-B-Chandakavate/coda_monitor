@@ -384,5 +384,3 @@ def send_teams_alert(self, message: str):
     # Implement Microsoft Teams logic
     pass
 ```
-
-**Built with ❤️ using DeepSeek AI & ChatGPT**
