@@ -6,6 +6,8 @@ services:
     container_name: coda-security-monitor
     ports:
       - "8000:8000"
+    env_file:
+      - .env  # This explicitly loads the .env file
     environment:
       - CODA_API_TOKEN=${CODA_API_TOKEN}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
@@ -15,4 +17,5 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./db.sqlite3:/app/db.sqlite3
+      - ./.env:/app/.env  # Also mount the .env file directly
     restart: unless-stopped

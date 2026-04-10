@@ -23,7 +23,7 @@ echo "✅ Docker and Docker Compose found"
 # Create .env file if it doesn't exist
 if [ ! -f .env ]; then
     echo "📝 Creating .env file from template..."
-    cp .env.example .env
+    cp .env .env
     echo "⚠️  Please edit .env file and add your CODA_API_TOKEN"
     echo "   Then run: docker-compose up -d"
     exit 0
