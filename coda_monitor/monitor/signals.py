@@ -17,6 +17,6 @@ def create_superuser(sender, **kwargs):
             email=email,
             password=password
         )
-        print("✅ Superuser created")
+        print("Superuser created")
     else:
-        print("⚠️ Superuser already exists, skipping")
+        print("Superuser already exists, skipping")

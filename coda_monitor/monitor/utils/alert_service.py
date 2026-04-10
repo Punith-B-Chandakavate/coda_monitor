@@ -36,10 +36,10 @@ class AlertService:
             return
 
         color_emoji = {
-            'CRITICAL': '🔴🔴🔴',
-            'HIGH': '🟠🟠',
-            'MEDIUM': '🟡',
-            'LOW': '🟢'
+            'CRITICAL': 'CRITICAL',
+            'HIGH': 'HIGH',
+            'MEDIUM': 'MEDIUM',
+            'LOW': 'LOW'
         }
 
         emoji = color_emoji.get(issue_data.get('severity'), '⚠️')
@@ -58,24 +58,24 @@ class AlertService:
             {
                 "type": "section",
                 "fields": [
-                    {"type": "mrkdwn", "text": f"*📄 Document:*\n{issue_data.get('document_name')}"},
-                    {"type": "mrkdwn", "text": f"*📊 Table:*\n{issue_data.get('table_name')}"},
-                    {"type": "mrkdwn", "text": f"*📝 Column:*\n{issue_data.get('column_name')}"},
-                    {"type": "mrkdwn", "text": f"*🔍 Pattern:*\n{issue_data.get('pattern_type')}"},
-                    {"type": "mrkdwn", "text": f"*⚠️ Severity:*\n{issue_data.get('severity')}"},
+                    {"type": "mrkdwn", "text": f"* Document:*\n{issue_data.get('document_name')}"},
+                    {"type": "mrkdwn", "text": f"* Table:*\n{issue_data.get('table_name')}"},
+                    {"type": "mrkdwn", "text": f"* Column:*\n{issue_data.get('column_name')}"},
+                    {"type": "mrkdwn", "text": f"* Pattern:*\n{issue_data.get('pattern_type')}"},
+                    {"type": "mrkdwn", "text": f"*️ Severity:*\n{issue_data.get('severity')}"},
                 ]
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*🔑 Detected Value:*\n`{issue_data.get('detected_value')}`"
+                    "text": f"* Detected Value:*\n`{issue_data.get('detected_value')}`"
                 }
             },
             {
                 "type": "context",
                 "elements": [
-                    {"type": "mrkdwn", "text": "🕐 Action required: Review and remediate this issue"}
+                    {"type": "mrkdwn", "text": " Action required: Review and remediate this issue"}
                 ]
             }
         ]
@@ -88,20 +88,13 @@ class AlertService:
             logger.info("Slack disabled - skipping remediation notification")
             return
 
-        # Map action to emoji and color
-        action_emoji = {
-            'resolve': '✅',
-            'ignore': '🚫',
-            'in_progress': '⏳'
-        }
-
         action_color = {
             'resolve': 'good',
             'ignore': 'warning',
             'in_progress': 'warning'
         }
 
-        emoji = action_emoji.get(remediation_data.get('action'), '📝')
+        colour = action_color.get(remediation_data.get('action'), ' ')
 
         # Get issue details if available
         issue_id = remediation_data.get('issue_id')
@@ -115,7 +108,7 @@ class AlertService:
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{emoji} Remediation Action Taken"
+                    "text": f"{colour} Remediation Action Taken"
                 }
             },
             {
@@ -153,7 +146,7 @@ class AlertService:
         blocks.append({
             "type": "context",
             "elements": [
-                {"type": "mrkdwn", "text": "🕐 Action logged in audit trail"}
+                {"type": "mrkdwn", "text": " Action logged in audit trail"}
             ]
         })
 
