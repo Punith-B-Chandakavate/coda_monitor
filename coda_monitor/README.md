@@ -1,5 +1,3 @@
-Here's a comprehensive README.md file that includes AI tool usage documentation:
-
 # 🔒 Coda Security Monitor
 
 A comprehensive security monitoring solution for Coda documents that automatically detects sensitive data, sends real-time alerts, and provides remediation workflows.
@@ -17,8 +15,8 @@ A comprehensive security monitoring solution for Coda documents that automatical
 - [API Documentation](#api-documentation)
 - [Troubleshooting](#troubleshooting)
 - [Extensibility](#extensibility)
-- [Contributing](#contributing)
-- [License](#license)
+
+
 
 ## ✨ Features
 
