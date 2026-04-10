@@ -1,0 +1,257 @@
+{% extends 'monitor/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>🔒 Coda Document Security Monitor</h1>
+
+    <div class="summary-cards">
+        <div class="card">
+            <h3>📄 Documents</h3>
+            <div class="stat" id="total-docs">0</div>
+        </div>
+        <div class="card critical">
+            <h3>🔥 Critical Issues</h3>
+            <div class="stat" id="critical-issues">0</div>
+        </div>
+        <div class="card high">
+            <h3>⚠️ High Issues</h3>
+            <div class="stat" id="high-issues">0</div>
+        </div>
+        <div class="card">
+            <h3>📋 Open Issues</h3>
+            <div class="stat" id="open-issues">0</div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button onclick="triggerScan()" class="btn btn-primary">🔄 Trigger Scan</button>
+        <button onclick="refreshData()" class="btn btn-secondary">⟳ Refresh</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('issues')">🚨 Open Issues</button>
+        <button class="tab-btn" onclick="showTab('documents')">📁 Documents</button>
+        <button class="tab-btn" onclick="showTab('scans')">📊 Scan History</button>
+    </div>
+
+    <div id="issues-tab" class="tab-content active">
+        <div class="filters">
+            <select id="severity-filter" onchange="loadIssues()">
+                <option value="">All Severities</option>
+                <option value="CRITICAL">Critical</option>
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+            </select>
+        </div>
+        <div id="issues-list" class="issues-list">
+            <div class="loading">Loading issues...</div>
+        </div>
+    </div>
+
+    <div id="documents-tab" class="tab-content">
+        <div id="documents-list" class="documents-list">
+            <div class="loading">Loading documents...</div>
+        </div>
+    </div>
+
+    <div id="scans-tab" class="tab-content">
+        <div id="scans-list" class="scans-list">
+            <div class="loading">Loading scans...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    setInterval(refreshData, 30000);
+
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        event.target.classList.add('active');
+
+        if (tabName === 'issues') loadIssues();
+        else if (tabName === 'documents') loadDocuments();
+        else if (tabName === 'scans') loadScans();
+    }
+
+    async function refreshData() {
+        await loadSummary();
+        if (document.getElementById('issues-tab').classList.contains('active')) {
+            await loadIssues();
+        } else if (document.getElementById('documents-tab').classList.contains('active')) {
+            await loadDocuments();
+        }
+    }
+
+    async function loadSummary() {
+        try {
+            const response = await fetch('/api/summary/');
+            const data = await response.json();
+            document.getElementById('total-docs').textContent = data.total_documents;
+            document.getElementById('open-issues').textContent = data.open_issues;
+            document.getElementById('critical-issues').textContent = data.critical_issues;
+            document.getElementById('high-issues').textContent = data.high_issues;
+        } catch(e) {
+            console.error('Failed to load summary:', e);
+        }
+    }
+
+    async function loadIssues() {
+        const severity = document.getElementById('severity-filter')?.value || '';
+        const url = `/api/issues/?${severity ? `severity=${severity}` : ''}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            const issuesList = document.getElementById('issues-list');
+            if (data.issues.length === 0) {
+                issuesList.innerHTML = '<div class="no-data">✅ No issues found</div>';
+                return;
+            }
+
+            issuesList.innerHTML = data.issues.map(issue => `
+                <div class="issue-card severity-${issue.severity.toLowerCase()}">
+                    <div class="issue-header">
+                        <span class="severity-badge ${issue.severity.toLowerCase()}">${issue.severity}</span>
+                        <span class="pattern-type">${issue.pattern_type}</span>
+                        <span class="detected-at">${new Date(issue.detected_at).toLocaleString()}</span>
+                    </div>
+                    <div class="issue-details">
+                        <strong>Document:</strong> ${escapeHtml(issue.document_name)}<br>
+                        <strong>Location:</strong> ${escapeHtml(issue.table_name)} → ${escapeHtml(issue.column_name)}<br>
+                        <strong>Detected:</strong> <code>${escapeHtml(issue.detected_value)}</code>
+                    </div>
+                    <div class="issue-actions">
+                        <button onclick="remediateIssue(${issue.id}, 'resolve')" class="btn-small btn-resolve">✓ Resolve</button>
+                        <button onclick="remediateIssue(${issue.id}, 'ignore')" class="btn-small btn-ignore">✗ Ignore</button>
+                        <button onclick="remediateIssue(${issue.id}, 'in_progress')" class="btn-small btn-progress">⏳ In Progress</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) {
+            console.error('Failed to load issues:', e);
+        }
+    }
+
+    async function loadDocuments() {
+        try {
+            const response = await fetch('/api/documents/');
+            const data = await response.json();
+
+            const docsList = document.getElementById('documents-list');
+            if (data.documents.length === 0) {
+                docsList.innerHTML = '<div class="no-data">No documents found. Make sure your Coda API token is valid.</div>';
+                return;
+            }
+
+            docsList.innerHTML = data.documents.map(doc => `
+                <div class="document-card">
+                    <div class="document-header">
+                        <strong>${escapeHtml(doc.name)}</strong>
+                        <span class="issue-count">${doc.issue_count} issues</span>
+                    </div>
+                    <div class="document-details">
+                        Last updated: ${new Date(doc.updated_at).toLocaleString()}<br>
+                        Last scanned: ${doc.last_scanned ? new Date(doc.last_scanned).toLocaleString() : 'Never'}
+                    </div>
+                    <button onclick="viewDocument(${doc.id})" class="btn-small">View Details</button>
+                </div>
+            `).join('');
+        } catch(e) {
+            console.error('Failed to load documents:', e);
+        }
+    }
+
+    async function loadScans() {
+        try {
+            const response = await fetch('/api/summary/');
+            const data = await response.json();
+
+            const scansList = document.getElementById('scans-list');
+            if (data.recent_scans.length === 0) {
+                scansList.innerHTML = '<div class="no-data">No scans performed yet</div>';
+                return;
+            }
+
+            scansList.innerHTML = data.recent_scans.map(scan => `
+                <div class="scan-card">
+                    <div class="scan-header">
+                        <span class="scan-status ${scan.status.toLowerCase()}">${scan.status}</span>
+                        <span class="scan-time">${new Date(scan.scan_start).toLocaleString()}</span>
+                    </div>
+                    <div class="scan-details">
+                        Documents scanned: ${scan.documents_scanned}<br>
+                        Issues found: ${scan.issues_found}
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) {
+            console.error('Failed to load scans:', e);
+        }
+    }
+
+    async function remediateIssue(issueId, action) {
+        if (!confirm(`Are you sure you want to ${action} this issue?`)) return;
+
+        try {
+            const response = await fetch('/api/remediate/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({issue_id: issueId, action: action})
+            });
+
+            if (response.ok) {
+                alert('✅ Remediation action completed');
+                loadIssues();
+                loadSummary();
+            } else {
+                alert('❌ Failed to remediate issue');
+            }
+        } catch(e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    async function triggerScan() {
+        if (!confirm('Start a new scan? This may take a few minutes.')) return;
+
+        try {
+            const response = await fetch('/api/trigger-scan/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+
+            if (response.ok) {
+                alert('🔄 Scan initiated. Results will appear shortly.');
+                setTimeout(refreshData, 5000);
+            } else {
+                alert('❌ Failed to start scan');
+            }
+        } catch(e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    function viewDocument(docId) {
+        window.location.href = `/admin/monitor/codadocument/${docId}/change/`;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Initial load
+    refreshData();
+    loadIssues();
+</script>
+{% endblock %}
