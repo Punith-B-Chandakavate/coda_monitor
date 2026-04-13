@@ -9,6 +9,7 @@ class MonitorConfig(AppConfig):
     name = 'monitor'
 
     def ready(self):
+        import monitor.signals
         if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
             return
 
