@@ -155,7 +155,7 @@ def remediate_issue_sync(issue_id: int, action: str, note: str = ""):
             'issue_details': issue_details
         })
 
-        logger.info(f"Issue {issue_id} remediated with action: {action} - Slack notified: {result}")
+        logger.info(f"Issue {issue_id} remediated with action: {action} - Slack notified: {alert_service}")
         return True
 
     except Exception as e:
